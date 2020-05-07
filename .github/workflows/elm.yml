@@ -1,0 +1,49 @@
+name: Elm CI
+
+on: [push, pull_request]
+
+jobs:
+  check-commit-message:
+    name: check commit message if skipping build(s)
+    runs-on: ubuntu-latest
+
+    # skips CI and prints cli message, without fail build badge
+    if: "contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: print message via cli
+        run: echo "no need to build, based from commit message"
+
+  build:
+    name: Setup Elm and test it
+    runs-on: ubuntu-latest
+
+    # doesn't contain "ci skip" in commit message
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: clone repo
+        uses: actions/checkout@v2
+
+      - name: setup nodejs
+        uses: actions/setup-node@v1
+
+      - name: get npm cache dir
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: cache node modules
+        uses: actions/cache@v1
+        id: npm
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: install Elm, elm-format & elm-test
+        if: steps.npm.outputs.cache-hit != 'true'
+        run: |
+          npm install elm elm-format elm-test
+
+      - name: format and run test
+        run: npx elm-format {src,tests} --yes | npx elm-test
+
+

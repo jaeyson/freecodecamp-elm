@@ -1,0 +1,8 @@
+*.elm eol=lf
+*.js eol=lf
+*.json eol=lf
+*.md eol=lf
+
+*.lock export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
