@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build":  "run(){ elm make src/\"$1\".elm --output=dist/\"$1\".js; }; run",
+    "build-all": "run(){ ls -1 src/ | xargs -l bash -c 'elm make src/$0 --output=dist/$0.js'; }; run",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
