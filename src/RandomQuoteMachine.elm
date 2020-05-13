@@ -24,6 +24,7 @@ type alias Quote =
 type alias Model =
     { quotes : Array Quote
     , error : String
+    , randomQuote : Maybe Quote
     }
 
 
@@ -49,6 +50,7 @@ init _ =
                   }
                 ]
       , error = ""
+      , randomQuote = Nothing
       }
     , getQuote
     )
@@ -80,21 +82,31 @@ quoteHelp =
 
 type Msg
     = GotQuote (Result Http.Error (Array Quote))
-    | GenerateRandomQuote Quote
+    | GenerateRandomQuote
+    | RandomQuote Int
 
 
 update msg model =
     case msg of
-        GenerateRandomQuote quote ->
+        GenerateRandomQuote ->
             ( model
-            , getQuote
+            , Random.generate RandomQuote <|
+                Random.int 1 (arrayLength model.quotes)
+            )
+
+        RandomQuote quote ->
+            ( { model |
+                randomQuote = Array.get quote model.quotes
+              }
+            , Cmd.none
             )
 
         GotQuote (Ok value) ->
             ( { model
                 | quotes = value
               }
-            , Cmd.none
+            , Random.generate RandomQuote <|
+                Random.int 1 (arrayLength model.quotes)
             )
 
         GotQuote (Err errorMessage) ->
@@ -122,6 +134,9 @@ buildErrorMessage errorMessage =
         Http.BadStatus code ->
             String.fromInt code
 
+arrayLength array =
+    Array.length <| array
+
 
 
 -- Subscriptions
@@ -138,10 +153,25 @@ subscriptions _ =
 view model =
     Html.div
         []
-        [ Html.text "TODO: randomized 1 quote at a time"
-        , Html.ul [] <|
-            List.map viewQuote <|
-                Array.toList model.quotes
+        [ Html.h1 []
+            [ Html.text "TODO: randomized init, indexdb local storage and state"
+            ]
+        --, Html.ul [] <|
+            --List.map viewQuote <|
+                --Array.toList model.quotes
+        , Html.text <|
+            case model.randomQuote of
+                Just quote ->
+                    "Quote: "
+                        ++ quote.quote
+                        ++ " Author: "
+                        ++ quote.author
+                Nothing ->
+                    ""
+        , Html.button
+            [ Events.onClick GenerateRandomQuote
+            ]
+            [ Html.text "new quote" ]
         ]
 
 
