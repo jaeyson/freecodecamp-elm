@@ -2,6 +2,8 @@ module BasicAlgo exposing (..)
 
 import Html exposing (Html)
 
+
+
 --factorialize num =
 
 
@@ -14,5 +16,6 @@ convertToF : Float -> Float
 convertToF celsius =
     celsius * (9 / 5) + 32
 
+
 main =
-  Html.text "BasicAlgo.elm"
+    Html.text "BasicAlgo.elm"

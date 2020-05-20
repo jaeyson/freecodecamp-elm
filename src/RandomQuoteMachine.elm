@@ -59,21 +59,40 @@ init _ =
 getQuote : Cmd Msg
 getQuote =
     Http.get
-        --{ url = "https://api.kanye.rest"
-        { url = "https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json"
+        --{ url = "https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json"
+        { url = "http://localhost:3000/quotes"
         , expect = Http.expectJson GotQuote quoteDecoder
         }
 
+--initCmd : Cmd Msg -> Cmd Msg -> Cmd Msg
+initCmd httpGet randomQuote =
+    case httpGet of
+        GotQuote (Ok quotes) ->
+            GenerateRandomQuote
 
-quoteDecoder : JD.Decoder (Array Quote)
+        _ ->
+            NoOp
+
+
+
+--quoteDecoder : JD.Decoder (Array Quote)
+
+
 quoteDecoder =
-    JD.field "quotes" (JD.array quoteHelp)
+    --JD.field "quotes" (JD.array quoteHelp)
+    JD.array quoteHelp
 
 
 quoteHelp =
     JD.map2 Quote
         (JD.field "quote" JD.string)
         (JD.field "author" JD.string)
+
+
+getRandomQuote : Array Quote -> Cmd Msg
+getRandomQuote quotes =
+    Random.generate RandomQuote <|
+        Random.int 1 (arrayLength quotes)
 
 
 
@@ -84,29 +103,28 @@ type Msg
     = GotQuote (Result Http.Error (Array Quote))
     | GenerateRandomQuote
     | RandomQuote Int
+    | NoOp
 
 
 update msg model =
     case msg of
         GenerateRandomQuote ->
             ( model
-            , Random.generate RandomQuote <|
-                Random.int 1 (arrayLength model.quotes)
+            , getRandomQuote model.quotes
             )
 
-        RandomQuote quote ->
-            ( { model |
-                randomQuote = Array.get quote model.quotes
+        RandomQuote randomIndexNumber ->
+            ( { model
+                | randomQuote = Array.get randomIndexNumber model.quotes
               }
             , Cmd.none
             )
 
-        GotQuote (Ok value) ->
+        GotQuote (Ok quotes) ->
             ( { model
-                | quotes = value
+                | quotes = quotes
               }
-            , Random.generate RandomQuote <|
-                Random.int 1 (arrayLength model.quotes)
+            , getRandomQuote model.quotes
             )
 
         GotQuote (Err errorMessage) ->
@@ -115,6 +133,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        NoOp ->
+            (model, Cmd.none)
 
 
 buildErrorMessage errorMessage =
@@ -133,6 +154,7 @@ buildErrorMessage errorMessage =
 
         Http.BadStatus code ->
             String.fromInt code
+
 
 arrayLength array =
     Array.length <| array
@@ -156,9 +178,7 @@ view model =
         [ Html.h1 []
             [ Html.text "TODO: randomized init, indexdb local storage and state"
             ]
-        --, Html.ul [] <|
-            --List.map viewQuote <|
-                --Array.toList model.quotes
+        , Html.text model.error
         , Html.text <|
             case model.randomQuote of
                 Just quote ->
@@ -166,6 +186,7 @@ view model =
                         ++ quote.quote
                         ++ " Author: "
                         ++ quote.author
+
                 Nothing ->
                     ""
         , Html.button
