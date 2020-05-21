@@ -1,4 +1,4 @@
-module RandomQuoteMachine exposing (..)
+module RandomQuoteMachine exposing (main)
 
 import Array exposing (Array)
 import Browser
@@ -25,20 +25,8 @@ type alias Model =
     { quotes : Array Quote
     , error : String
     , randomQuote : Maybe Quote
+    , number : Maybe Int
     }
-
-
-
-{--
-arr = Array.fromList model.quotes
-Array.length arr
-
-type alias Model =
-  Array {author : String, quote : String}
-
-Array.get : Int -> Array Model -> Maybe Model
-Array.get 1 arr
---}
 
 
 init : () -> ( Model, Cmd Msg )
@@ -51,10 +39,10 @@ init _ =
                 ]
       , error = ""
       , randomQuote = Nothing
+      , number = Nothing
       }
     , getQuote
     )
-
 
 getQuote : Cmd Msg
 getQuote =
@@ -64,20 +52,8 @@ getQuote =
         , expect = Http.expectJson GotQuote quoteDecoder
         }
 
---initCmd : Cmd Msg -> Cmd Msg -> Cmd Msg
-initCmd httpGet randomQuote =
-    case httpGet of
-        GotQuote (Ok quotes) ->
-            GenerateRandomQuote
 
-        _ ->
-            NoOp
-
-
-
---quoteDecoder : JD.Decoder (Array Quote)
-
-
+quoteDecoder : JD.Decoder (Array Quote)
 quoteDecoder =
     --JD.field "quotes" (JD.array quoteHelp)
     JD.array quoteHelp
@@ -92,7 +68,7 @@ quoteHelp =
 getRandomQuote : Array Quote -> Cmd Msg
 getRandomQuote quotes =
     Random.generate RandomQuote <|
-        Random.int 1 (arrayLength quotes)
+        Random.int 0 (arrayLength quotes)
 
 
 
@@ -103,7 +79,6 @@ type Msg
     = GotQuote (Result Http.Error (Array Quote))
     | GenerateRandomQuote
     | RandomQuote Int
-    | NoOp
 
 
 update msg model =
@@ -116,6 +91,7 @@ update msg model =
         RandomQuote randomIndexNumber ->
             ( { model
                 | randomQuote = Array.get randomIndexNumber model.quotes
+                , number = Just randomIndexNumber
               }
             , Cmd.none
             )
@@ -123,6 +99,7 @@ update msg model =
         GotQuote (Ok quotes) ->
             ( { model
                 | quotes = quotes
+                , number = Nothing
               }
             , getRandomQuote model.quotes
             )
@@ -130,12 +107,10 @@ update msg model =
         GotQuote (Err errorMessage) ->
             ( { model
                 | error = buildErrorMessage errorMessage
+                , number = Nothing
               }
             , Cmd.none
             )
-
-        NoOp ->
-            (model, Cmd.none)
 
 
 buildErrorMessage errorMessage =
@@ -157,21 +132,11 @@ buildErrorMessage errorMessage =
 
 
 arrayLength array =
-    Array.length <| array
-
-
-
--- Subscriptions
-
-
-subscriptions _ =
-    Sub.none
+    Array.length array
 
 
 
 -- View
-
-
 view model =
     Html.div
         []
@@ -189,6 +154,14 @@ view model =
 
                 Nothing ->
                     ""
+        , Html.h3 []
+            [ Html.text <|
+                case model.number of
+                    Just number ->
+                        String.fromInt number
+                    Nothing ->
+                        ""
+            ]
         , Html.button
             [ Events.onClick GenerateRandomQuote
             ]
@@ -216,5 +189,5 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions = \_ -> Sub.none
         }
