@@ -44,6 +44,7 @@ init _ =
     , getQuote
     )
 
+
 getQuote : Cmd Msg
 getQuote =
     Http.get
@@ -68,7 +69,7 @@ quoteHelp =
 getRandomQuote : Array Quote -> Cmd Msg
 getRandomQuote quotes =
     Random.generate RandomQuote <|
-        Random.int 0 (arrayLength quotes)
+        Random.int 0 (arrayLength quotes - 1)
 
 
 
@@ -101,7 +102,9 @@ update msg model =
                 | quotes = quotes
                 , number = Nothing
               }
-            , getRandomQuote model.quotes
+              -- List.map : (a -> b) -> List a -> List b
+              -- Cmd.map : (a -> msg) -> Cmd a -> Cmd msg
+            , Cmd.map (\_ -> GenerateRandomQuote) (getRandomQuote model.quotes)
             )
 
         GotQuote (Err errorMessage) ->
@@ -137,11 +140,13 @@ arrayLength array =
 
 
 -- View
+
+
 view model =
     Html.div
         []
         [ Html.h1 []
-            [ Html.text "TODO: randomized init, indexdb local storage and state"
+            [ Html.text "TODO: indexdb local storage"
             ]
         , Html.text model.error
         , Html.text <|
@@ -159,6 +164,7 @@ view model =
                 case model.number of
                     Just number ->
                         String.fromInt number
+
                     Nothing ->
                         ""
             ]
