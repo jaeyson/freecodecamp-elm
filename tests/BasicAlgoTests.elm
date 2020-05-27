@@ -6,6 +6,20 @@ import Fuzz exposing (Fuzzer)
 import Test exposing (Test)
 
 
+confirmEnding : Test
+confirmEnding =
+    Test.fuzz2 Fuzz.string Fuzz.string "Check if a string ends with the given target string." <|
+        \targetString string ->
+            let
+                fuzzOutput =
+                    string
+                        |> String.right (String.length targetString)
+                        |> (==) targetString
+            in
+            BasicAlgo.confirmEnding string targetString
+                |> Expect.equal fuzzOutput
+
+
 factorialize : Test
 factorialize =
     Test.describe "return factorial of the provided integer"

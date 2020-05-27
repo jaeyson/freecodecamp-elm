@@ -1,6 +1,19 @@
 module BasicAlgo exposing (..)
 
 
+confirmEnding : String -> String -> Bool
+confirmEnding string targetString =
+    String.endsWith targetString string
+
+
+
+{--
+string
+  |> String.right (String.length targetString)
+  |> (==) targetString
+--}
+
+
 factorialize : Int -> Int
 factorialize num =
     case num of
