@@ -6,6 +6,47 @@ import Fuzz exposing (Fuzzer)
 import Test exposing (Test)
 
 
+countHowManyTestFunctions =
+    Test.describe "count the functions inside this module excluding this function"
+        [ Test.test "no desc" <|
+            \_ -> Expect.equal 4 (Debug.log "how many functions?" 4)
+        ]
+
+
+chunkArrayInGroups : Test
+chunkArrayInGroups =
+    Test.describe "splits a list into groups of N and returns 2-dimensional list"
+        [ Test.test "test 1" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ "a", "b", "c", "d" ] 2
+                    |> Expect.equal [ [ "a", "b" ], [ "c", "d" ] ]
+        , Test.test "test 2" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 3
+                    |> Expect.equal [ [ 0, 1, 2 ], [ 3, 4, 5 ] ]
+        , Test.test "test 3" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 2
+                    |> Expect.equal [ [ 0, 1 ], [ 2, 3 ], [ 4, 5 ] ]
+        , Test.test "test 4" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 4
+                    |> Expect.equal [ [ 0, 1, 2, 3 ], [ 4, 5 ] ]
+        , Test.test "test 5" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6 ] 3
+                    |> Expect.equal [ [ 0, 1, 2 ], [ 3, 4, 5 ], [ 6 ] ]
+        , Test.test "test 6" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ] 4
+                    |> Expect.equal [ [ 0, 1, 2, 3 ], [ 4, 5, 6, 7 ], [ 8 ] ]
+        , Test.test "test 7" <|
+            \_ ->
+                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ] 2
+                    |> Expect.equal [ [ 0, 1 ], [ 2, 3 ], [ 4, 5 ], [ 6, 7 ], [ 8 ] ]
+        ]
+
+
 confirmEnding : Test
 confirmEnding =
     Test.fuzz2 Fuzz.string Fuzz.string "Check if a string ends with the given target string." <|

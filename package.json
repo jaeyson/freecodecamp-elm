@@ -7,7 +7,7 @@
     "build":  "run(){ elm make src/\"$1\".elm --output=dist/\"$1\".js; }; run",
     "build-all": "run(){ ls -1 src/ | xargs -l bash -c 'elm make src/$0 --output=dist/$0.js'; }; run",
     "build-optimize": "run(){ ls -1 src/ | grep .elm | sed 's/\\.elm//g' | xargs -n 1 bash -c './optimize.sh $0.elm'; }; run",
-    "test": "elm-test"
+    "watch": "elm-test --watch"
   },
   "keywords": [],
   "author": "",

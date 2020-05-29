@@ -1,17 +1,23 @@
 module BasicAlgo exposing (..)
 
 
+chunkArrayInGroups : List a -> Int -> List (List a)
+chunkArrayInGroups list size =
+    case List.take size list of
+        [] ->
+            []
+
+        head ->
+            head :: chunkArrayInGroups (List.drop size list) size
+
+
+booWhoo any =
+    Debug.todo "how to compare a to Bool?"
+
+
 confirmEnding : String -> String -> Bool
 confirmEnding string targetString =
     String.endsWith targetString string
-
-
-
-{--
-string
-  |> String.right (String.length targetString)
-  |> (==) targetString
---}
 
 
 factorialize : Int -> Int
