@@ -3,11 +3,14 @@ module BasicAlgo exposing (..)
 
 chunkArrayInGroups : List a -> Int -> List (List a)
 chunkArrayInGroups list size =
-    case List.take size list of
-        [] ->
+    case ( List.take size list, size ) of
+        ( _, 0 ) ->
+            list :: []
+
+        ( [], _ ) ->
             []
 
-        head ->
+        ( head, _ ) ->
             head :: chunkArrayInGroups (List.drop size list) size
 
 

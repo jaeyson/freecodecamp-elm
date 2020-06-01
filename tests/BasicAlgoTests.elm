@@ -15,36 +15,87 @@ countHowManyTestFunctions =
 
 chunkArrayInGroups : Test
 chunkArrayInGroups =
-    Test.describe "splits a list into groups of N and returns 2-dimensional list"
-        [ Test.test "test 1" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ "a", "b", "c", "d" ] 2
-                    |> Expect.equal [ [ "a", "b" ], [ "c", "d" ] ]
-        , Test.test "test 2" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 3
-                    |> Expect.equal [ [ 0, 1, 2 ], [ 3, 4, 5 ] ]
-        , Test.test "test 3" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 2
-                    |> Expect.equal [ [ 0, 1 ], [ 2, 3 ], [ 4, 5 ] ]
-        , Test.test "test 4" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5 ] 4
-                    |> Expect.equal [ [ 0, 1, 2, 3 ], [ 4, 5 ] ]
-        , Test.test "test 5" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6 ] 3
-                    |> Expect.equal [ [ 0, 1, 2 ], [ 3, 4, 5 ], [ 6 ] ]
-        , Test.test "test 6" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ] 4
-                    |> Expect.equal [ [ 0, 1, 2, 3 ], [ 4, 5, 6, 7 ], [ 8 ] ]
-        , Test.test "test 7" <|
-            \_ ->
-                BasicAlgo.chunkArrayInGroups [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ] 2
-                    |> Expect.equal [ [ 0, 1 ], [ 2, 3 ], [ 4, 5 ], [ 6, 7 ], [ 8 ] ]
-        ]
+    Test.fuzz3
+        (Fuzz.list Fuzz.string)
+        (Fuzz.list Fuzz.int)
+        (Fuzz.intRange 0 10000)
+        "splits list into groups of N"
+    <|
+        \listString listInt size ->
+            let
+                lengthStr =
+                    List.length listString
+
+                lengthInt =
+                    List.length listInt
+
+                userInputStr =
+                    BasicAlgo.chunkArrayInGroups listString size
+                        |> List.length
+
+                userInputInt =
+                    BasicAlgo.chunkArrayInGroups listInt size
+                        |> List.length
+
+                float =
+                    size |> toFloat
+            in
+            case ( lengthStr, lengthInt, size ) of
+                ( 0, _, 1 ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        (List.length listInt)
+
+                ( _, 0, 1 ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        (List.length listString)
+
+                ( 0, 0, _ ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        0
+
+                ( 1, 0, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        1
+
+                ( 0, 1, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        1
+
+                ( 1, 1, _ ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        1
+
+                ( _, _, 0 ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        1
+
+                ( _, _, 1 ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        (List.length listString)
+
+                ( _, 0, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        ((List.length >> toFloat) listString / float |> ceiling)
+
+                ( 0, _, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        ((List.length >> toFloat) listInt / float |> ceiling)
+
+                ( _, _, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        -- TODO: only listInt, include also listString!!!
+                        ((List.length >> toFloat) listInt / float |> ceiling)
 
 
 confirmEnding : Test
