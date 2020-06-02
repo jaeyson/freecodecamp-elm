@@ -13,6 +13,37 @@ countHowManyTestFunctions =
         ]
 
 
+{--
+chunkArrayInGroups : Test
+chunkArrayInGroups =
+    Test.fuzz2 (Fuzz.list Fuzz.string) (Fuzz.intRange 0 10000) "splits list into groups of N" <|
+        \listString size ->
+            let
+                userInput =
+                    BasicAlgo.chunkArrayInGroups listString size
+                        |> List.length
+
+                float = size |> toFloat
+            in
+            case ( List.length listString, size ) of
+                (0, 0) ->
+                    Expect.equal userInput 1
+
+                (_, 0) ->
+                    Expect.equal userInput 1
+
+                (1, _) ->
+                    Expect.equal userInput 1
+
+                (_, 1) ->
+                    (List.length listString)
+                        |> Expect.equal userInput
+
+                (_, _) ->
+                    ((List.length >> toFloat) listString / float |> ceiling)
+                        |> Expect.equal userInput
+--}
+
 chunkArrayInGroups : Test
 chunkArrayInGroups =
     Test.fuzz3
@@ -41,6 +72,31 @@ chunkArrayInGroups =
                     size |> toFloat
             in
             case ( lengthStr, lengthInt, size ) of
+                ( 0, 0, 0 ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        1
+
+                ( 0, 0, _ ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        0
+
+                ( _, _, 0 ) ->
+                    Expect.all
+                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        1
+
+                ( _, 1, 1 ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        (List.length listString)
+
+                ( 1, _, 1 ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        (List.length listInt)
+
                 ( 0, _, 1 ) ->
                     Expect.all
                         [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
@@ -50,11 +106,6 @@ chunkArrayInGroups =
                     Expect.all
                         [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
                         (List.length listString)
-
-                ( 0, 0, _ ) ->
-                    Expect.all
-                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
-                        0
 
                 ( 1, 0, _ ) ->
                     Expect.all
@@ -71,15 +122,25 @@ chunkArrayInGroups =
                         [ Expect.equal userInputStr, Expect.equal userInputInt ]
                         1
 
-                ( _, _, 0 ) ->
-                    Expect.all
-                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
-                        1
-
                 ( _, _, 1 ) ->
+                    if lengthStr > lengthInt then
+                        Expect.all
+                            [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                            (List.length listString)
+                    else
+                        Expect.all
+                            [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                            (List.length listInt)
+
+                ( _, 1, _ ) ->
                     Expect.all
-                        [ Expect.equal userInputStr, Expect.equal userInputInt ]
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
                         (List.length listString)
+
+                ( 1, _, _ ) ->
+                    Expect.all
+                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                        (List.length listInt)
 
                 ( _, 0, _ ) ->
                     Expect.all
@@ -92,10 +153,14 @@ chunkArrayInGroups =
                         ((List.length >> toFloat) listInt / float |> ceiling)
 
                 ( _, _, _ ) ->
-                    Expect.all
-                        [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
-                        -- TODO: only listInt, include also listString!!!
-                        ((List.length >> toFloat) listInt / float |> ceiling)
+                    if lengthStr > lengthInt then
+                        Expect.all
+                            [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                            ((List.length >> toFloat) listString / float |> ceiling)
+                    else
+                        Expect.all
+                            [ Expect.atLeast userInputStr, Expect.atLeast userInputInt ]
+                            ((List.length >> toFloat) listInt / float |> ceiling)
 
 
 confirmEnding : Test
