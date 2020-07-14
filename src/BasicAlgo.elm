@@ -1,5 +1,20 @@
 module BasicAlgo exposing (..)
 
+{--
+frankenSplice([1, 2, 3], [4, 5], 1) // [ 4, 1, 2, 3, 5 ]
+frankenSplice([1,2],[4,5,6,7],2) // [ 4, 5, 1, 2, 6, 7 ]
+frankenSplice([1,2],[4,5,6,7],3) // [ 4, 5, 6, 1, 2, 7 ]
+frankenSplice([1,2],[4,5,6,7],4) // [ 4, 5, 6, 7, 1, 2 ]
+frankenSplice([1,2],[4,5,6,7],5) // [ 4, 5, 6, 7, 1, 2 ]
+frankenSplice([1,2],[4,5,6,7],0) // [ 1, 2, 4, 5, 6, 7 ]
+frankenSplice([1,2],[4,5,6,7],1) // [ 4, 1, 2, 5, 6, 7 ]
+frankenSplice([1,2,3],[4,5,6,7],1) // [ 4, 1, 2, 3, 5, 6, 7 ]
+frankenSplice(["me",2,3],[4,5,6,7],1) //[ 4, 'me', 2, 3, 5, 6,7 ]
+
+frankenSplice : List a -> List a-> Int -> List a
+frankenSplice listA listB num =
+--}
+
 
 chunkArrayInGroups : List a -> Int -> List (List a)
 chunkArrayInGroups list size =
